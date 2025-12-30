@@ -17,16 +17,23 @@ const (
 
 type app struct {
 	version string
+	store *productStore
 }
 
 func main() {
 	a := app{
 		version: getenv("VERSION", "0.0.0"),
+		store: storeNew([]Product{
+			{ID: "p-001", Name: "Keyboard", PriceCents: 3999},
+			{ID: "p-002", Name: "Mouse", PriceCents: 1999},
+			{ID: "p-003", Name: "USB-C Cable", PriceCents: 999},
+		}),
 	}
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /healthz", a.handleHealthz)
 	mux.HandleFunc("GET /version", a.handleVersion)
+	mux.HandleFunc("GET /products", a.handleProducts)
 
 	srv := &http.Server{
 		Addr:              ":" + getenv("PORT", defaultPort),
