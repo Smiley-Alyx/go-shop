@@ -1,13 +1,13 @@
 package main
 
-// Price хранится в копейках/центах (int), чтобы не связываться с float
+// Price хранится в копейках/центах (int), чтобы не связываться с float.
 type Product struct {
 	ID    int
 	Name  string
 	Price int
 }
 
-// NewProduct — "конструктор"
+// NewProduct создаёт структуру Product с заданными полями.
 func NewProduct(id int, name string, price int) Product {
 	p := Product{}
 	p.ID = id
@@ -16,7 +16,7 @@ func NewProduct(id int, name string, price int) Product {
 	return p
 }
 
-// ProductIsValid — очень грубая проверка "валидности"
+// ProductIsValid делает простую проверку заполненности полей.
 func ProductIsValid(p Product) int {
 	if p.ID <= 0 {
 		return 0

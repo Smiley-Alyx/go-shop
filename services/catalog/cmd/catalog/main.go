@@ -24,6 +24,8 @@ func main() {
 		version: getenv("VERSION", "0.0.0"),
 	}
 
+	storeProductsInit()
+
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /healthz", a.handleHealthz)
 	mux.HandleFunc("GET /version", a.handleVersion)

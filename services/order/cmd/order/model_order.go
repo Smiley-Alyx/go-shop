@@ -1,6 +1,6 @@
 package main
 
-// OrderStatus — статус заказа
+// OrderStatus — строковый статус заказа.
 type OrderStatus string
 
 const (
@@ -9,14 +9,14 @@ const (
 	OrderStatusCancelled OrderStatus = "cancelled"
 )
 
-// OrderItem — позиция заказа
+// OrderItem — позиция заказа.
 type OrderItem struct {
 	ProductID int
 	Qty       int
 }
 
 // Order — модель заказа.
-// Total — сумма заказа в копейках/центах (int). Пока считаем как хотим, без точности/валют
+// Total — сумма заказа в копейках/центах (int).
 type Order struct {
 	ID     int
 	Status OrderStatus
@@ -24,7 +24,7 @@ type Order struct {
 	Total  int
 }
 
-// NewOrder — "конструктор"
+// NewOrder создаёт заказ со статусом new.
 func NewOrder(id int) Order {
 	o := Order{}
 	o.ID = id
@@ -34,7 +34,7 @@ func NewOrder(id int) Order {
 	return o
 }
 
-// OrderIsValid - очень грубая проверка
+// OrderIsValid делает простую проверку заполненности обязательных полей.
 func OrderIsValid(o Order) int {
 	if o.ID <= 0 {
 		return 0
@@ -42,6 +42,6 @@ func OrderIsValid(o Order) int {
 	if o.Status == "" {
 		return 0
 	}
-	// Items и Total пока не проверяем — всё равно будем переписывать.
+	// Items и Total здесь не проверяем.
 	return 1
 }
