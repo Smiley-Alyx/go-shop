@@ -29,6 +29,9 @@ func main() {
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /healthz", a.handleHealthz)
 	mux.HandleFunc("GET /version", a.handleVersion)
+	mux.HandleFunc("POST /orders", a.handleOrdersCreate)
+	mux.HandleFunc("GET /orders/{id}", a.handleOrdersGet)
+	mux.HandleFunc("GET /orders/{id}/status", a.handleOrdersGetStatus)
 
 	srv := &http.Server{
 		Addr:              ":" + getenv("PORT", defaultPort),
