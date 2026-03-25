@@ -11,8 +11,8 @@ const (
 
 // OrderItem — позиция заказа.
 type OrderItem struct {
-	ProductID int
-	Qty       int
+	ProductID int `json:"product_id"`
+	Qty       int `json:"qty"`
 }
 
 // Order — модель заказа.
