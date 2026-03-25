@@ -50,6 +50,30 @@ func storeOrderGetByID(id int) (Order, int) {
 	return Order{}, 0
 }
 
+// storeOrderUpdateStatus меняет статус заказа.
+func storeOrderUpdateStatus(id int, status OrderStatus) (Order, int) {
+	ordersMu.Lock()
+	defer ordersMu.Unlock()
+
+	for i := 0; i < len(orders); i++ {
+		if orders[i].ID != id {
+			continue
+		}
+
+		if orders[i].Status != OrderStatusNew {
+			return Order{}, 0
+		}
+		if status != OrderStatusPaid && status != OrderStatusCancelled {
+			return Order{}, 0
+		}
+
+		orders[i].Status = status
+		return orders[i], 1
+	}
+
+	return Order{}, 0
+}
+
 // storeOrderList возвращает копию списка заказов.
 func storeOrderList() []Order {
 	ordersMu.Lock()
