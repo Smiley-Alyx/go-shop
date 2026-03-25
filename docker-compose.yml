@@ -1,0 +1,16 @@
+services:
+  catalog:
+    build:
+      context: ./services/catalog
+    network_mode: host
+    environment:
+      - PORT=8081
+      - VERSION=compose
+
+  order:
+    build:
+      context: ./services/order
+    network_mode: host
+    environment:
+      - PORT=8082
+      - VERSION=compose
