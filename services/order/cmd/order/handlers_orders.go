@@ -14,6 +14,10 @@ type statusResponse struct {
 	Status OrderStatus `json:"status"`
 }
 
+type setStatusRequest struct {
+	Status OrderStatus `json:"status"`
+}
+
 func (a app) handleOrdersCreate(w http.ResponseWriter, r *http.Request) {
 	var req createOrderRequest
 
@@ -88,6 +92,31 @@ func (a app) handleOrdersGetStatus(w http.ResponseWriter, r *http.Request) {
 	}
 
 	writeJSON(w, http.StatusOK, statusResponse{Status: o.Status})
+}
+
+func (a app) handleOrdersSetStatus(w http.ResponseWriter, r *http.Request) {
+	idStr := r.PathValue("id")
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		writeJSON(w, http.StatusBadRequest, map[string]any{"error": "bad id"})
+		return
+	}
+
+	var req setStatusRequest
+	dec := json.NewDecoder(r.Body)
+	err = dec.Decode(&req)
+	if err != nil {
+		writeJSON(w, http.StatusBadRequest, map[string]any{"error": "bad json"})
+		return
+	}
+
+	o, ok := storeOrderUpdateStatus(id, req.Status)
+	if ok == 0 {
+		writeJSON(w, http.StatusBadRequest, map[string]any{"error": "cannot update status"})
+		return
+	}
+
+	writeJSON(w, http.StatusOK, o)
 }
 
 func writeJSON(w http.ResponseWriter, code int, v any) {
