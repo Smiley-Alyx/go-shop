@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-const catalogBaseURL = "http://localhost:8081"
+var catalogBaseURL = getenv("CATALOG_URL", "http://localhost:8081")
 
 type catalogProduct struct {
 	ID    int    `json:"id"`
