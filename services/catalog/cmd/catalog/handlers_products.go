@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"io"
 	"net/http"
 	"strconv"
 )
@@ -41,8 +42,15 @@ func (a app) handleProductsCreate(w http.ResponseWriter, r *http.Request) {
 	var req createProductRequest
 
 	dec := json.NewDecoder(r.Body)
+	dec.DisallowUnknownFields()
 	err := dec.Decode(&req)
 	if err != nil {
+		writeJSON(w, http.StatusBadRequest, apiError{Error: "bad json"})
+		return
+	}
+
+	err = dec.Decode(&struct{}{})
+	if err != io.EOF {
 		writeJSON(w, http.StatusBadRequest, apiError{Error: "bad json"})
 		return
 	}
