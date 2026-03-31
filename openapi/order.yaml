@@ -98,6 +98,32 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+    post:
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SetStatusRequest'
+      responses:
+        '200':
+          description: updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
+        '400':
+          description: bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
 components:
   schemas:
     OrderItem:
@@ -138,6 +164,13 @@ components:
       required:
         - items
     StatusResponse:
+      type: object
+      properties:
+        status:
+          type: string
+      required:
+        - status
+    SetStatusRequest:
       type: object
       properties:
         status:
