@@ -10,6 +10,10 @@ type createOrderRequest struct {
 	Items []OrderItem `json:"items"`
 }
 
+type apiError struct {
+	Error string `json:"error"`
+}
+
 type statusResponse struct {
 	Status OrderStatus `json:"status"`
 }
@@ -24,12 +28,12 @@ func (a app) handleOrdersCreate(w http.ResponseWriter, r *http.Request) {
 	dec := json.NewDecoder(r.Body)
 	err := dec.Decode(&req)
 	if err != nil {
-		writeJSON(w, http.StatusBadRequest, map[string]any{"error": "bad json"})
+		writeJSON(w, http.StatusBadRequest, apiError{Error: "bad json"})
 		return
 	}
 
 	if len(req.Items) == 0 {
-		writeJSON(w, http.StatusBadRequest, map[string]any{"error": "empty items"})
+		writeJSON(w, http.StatusBadRequest, apiError{Error: "empty items"})
 		return
 	}
 
@@ -39,17 +43,17 @@ func (a app) handleOrdersCreate(w http.ResponseWriter, r *http.Request) {
 
 	for i := 0; i < len(o.Items); i++ {
 		if o.Items[i].ProductID <= 0 {
-			writeJSON(w, http.StatusBadRequest, map[string]any{"error": "bad product_id"})
+			writeJSON(w, http.StatusBadRequest, apiError{Error: "bad product_id"})
 			return
 		}
 		if o.Items[i].Qty <= 0 {
-			writeJSON(w, http.StatusBadRequest, map[string]any{"error": "bad qty"})
+			writeJSON(w, http.StatusBadRequest, apiError{Error: "bad qty"})
 			return
 		}
 
 		p, ok := fetchProductByID(o.Items[i].ProductID)
 		if ok == 0 {
-			writeJSON(w, http.StatusBadRequest, map[string]any{"error": "product not found"})
+			writeJSON(w, http.StatusBadRequest, apiError{Error: "product not found"})
 			return
 		}
 
@@ -64,13 +68,13 @@ func (a app) handleOrdersGet(w http.ResponseWriter, r *http.Request) {
 	idStr := r.PathValue("id")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
-		writeJSON(w, http.StatusBadRequest, map[string]any{"error": "bad id"})
+		writeJSON(w, http.StatusBadRequest, apiError{Error: "bad id"})
 		return
 	}
 
 	o, ok := storeOrderGetByID(id)
 	if ok == 0 {
-		writeJSON(w, http.StatusNotFound, map[string]any{"error": "not found"})
+		writeJSON(w, http.StatusNotFound, apiError{Error: "not found"})
 		return
 	}
 
@@ -81,13 +85,13 @@ func (a app) handleOrdersGetStatus(w http.ResponseWriter, r *http.Request) {
 	idStr := r.PathValue("id")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
-		writeJSON(w, http.StatusBadRequest, map[string]any{"error": "bad id"})
+		writeJSON(w, http.StatusBadRequest, apiError{Error: "bad id"})
 		return
 	}
 
 	o, ok := storeOrderGetByID(id)
 	if ok == 0 {
-		writeJSON(w, http.StatusNotFound, map[string]any{"error": "not found"})
+		writeJSON(w, http.StatusNotFound, apiError{Error: "not found"})
 		return
 	}
 
@@ -98,7 +102,7 @@ func (a app) handleOrdersSetStatus(w http.ResponseWriter, r *http.Request) {
 	idStr := r.PathValue("id")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
-		writeJSON(w, http.StatusBadRequest, map[string]any{"error": "bad id"})
+		writeJSON(w, http.StatusBadRequest, apiError{Error: "bad id"})
 		return
 	}
 
@@ -106,13 +110,13 @@ func (a app) handleOrdersSetStatus(w http.ResponseWriter, r *http.Request) {
 	dec := json.NewDecoder(r.Body)
 	err = dec.Decode(&req)
 	if err != nil {
-		writeJSON(w, http.StatusBadRequest, map[string]any{"error": "bad json"})
+		writeJSON(w, http.StatusBadRequest, apiError{Error: "bad json"})
 		return
 	}
 
 	o, ok := storeOrderUpdateStatus(id, req.Status)
 	if ok == 0 {
-		writeJSON(w, http.StatusBadRequest, map[string]any{"error": "cannot update status"})
+		writeJSON(w, http.StatusBadRequest, apiError{Error: "cannot update status"})
 		return
 	}
 
