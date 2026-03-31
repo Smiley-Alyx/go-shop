@@ -116,8 +116,15 @@ func (a app) handleOrdersSetStatus(w http.ResponseWriter, r *http.Request) {
 
 	var req setStatusRequest
 	dec := json.NewDecoder(r.Body)
+	dec.DisallowUnknownFields()
 	err = dec.Decode(&req)
 	if err != nil {
+		writeJSON(w, http.StatusBadRequest, apiError{Error: "bad json"})
+		return
+	}
+
+	err = dec.Decode(&struct{}{})
+	if err != io.EOF {
 		writeJSON(w, http.StatusBadRequest, apiError{Error: "bad json"})
 		return
 	}
