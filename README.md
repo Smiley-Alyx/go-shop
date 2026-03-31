@@ -45,7 +45,8 @@
 
 - `PORT` (по умолчанию `8082`)
 - `VERSION` (по умолчанию `0.0.0`)
-- `CATALOG_URL` (по умолчанию `http://localhost:8081`) — базовый URL сервиса `catalog`
+- `CATALOG_URL` (по умолчанию `http://localhost:8081`) — базовый URL сервиса `catalog`.
+  - при запуске через `docker compose` используется `http://catalog:8081`
 
 ## Quickstart
 
@@ -97,6 +98,11 @@ docker build -t go-shop-order:dev services/order
 docker compose up --build
 ```
 
+Порты проброшены на `localhost`:
+
+- `catalog`: `localhost:8081`
+- `order`: `localhost:8082`
+
 ## OpenAPI
 
 - `openapi/catalog.yaml`
@@ -139,6 +145,6 @@ make test
 - [x] docker-compose
 - [x] OpenAPI спецификация
 - [x] минимальные тесты хендлеров
-- [ ] статусы заказа: переходы (paid/cancelled)
-- [ ] простая валидация и ошибки
-- [ ] нормальная конфигурация `order -> catalog` без хардкода
+- [x] статусы заказа: переходы (paid/cancelled)
+- [x] простая валидация и ошибки
+- [x] нормальная конфигурация `order -> catalog` без хардкода
