@@ -2,15 +2,20 @@ services:
   catalog:
     build:
       context: ./services/catalog
-    network_mode: host
     environment:
       - PORT=8081
       - VERSION=compose
+    ports:
+      - "8081:8081"
 
   order:
     build:
       context: ./services/order
-    network_mode: host
     environment:
       - PORT=8082
       - VERSION=compose
+      - CATALOG_URL=http://catalog:8081
+    ports:
+      - "8082:8082"
+    depends_on:
+      - catalog
