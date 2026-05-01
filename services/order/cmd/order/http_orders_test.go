@@ -190,4 +190,22 @@ func TestOrdersSetStatus(t *testing.T) {
 	if st.Status != OrderStatusPaid {
 		t.Fatalf("status=%q", st.Status)
 	}
+
+	body4 := []byte(`{"status":"cancelled"}`)
+	r4 := httptest.NewRequest("POST", "/orders/1/status", bytes.NewReader(body4))
+	r4.Header.Set("Content-Type", "application/json")
+	w4 := httptest.NewRecorder()
+	mux.ServeHTTP(w4, r4)
+	if w4.Code != http.StatusBadRequest {
+		t.Fatalf("set cancelled after paid status=%d body=%q", w4.Code, w4.Body.String())
+	}
+
+	body5 := []byte(`{"status":"paid"}`)
+	r5 := httptest.NewRequest("POST", "/orders/999/status", bytes.NewReader(body5))
+	r5.Header.Set("Content-Type", "application/json")
+	w5 := httptest.NewRecorder()
+	mux.ServeHTTP(w5, r5)
+	if w5.Code != http.StatusNotFound {
+		t.Fatalf("set status not found status=%d body=%q", w5.Code, w5.Body.String())
+	}
 }

@@ -129,6 +129,12 @@ func (a app) handleOrdersSetStatus(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	_, ok := storeOrderGetByID(id)
+	if ok == 0 {
+		writeJSON(w, http.StatusNotFound, apiError{Error: "not found"})
+		return
+	}
+
 	o, ok := storeOrderUpdateStatus(id, req.Status)
 	if ok == 0 {
 		writeJSON(w, http.StatusBadRequest, apiError{Error: "cannot update status"})
