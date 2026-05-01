@@ -124,6 +124,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+        '404':
+          description: not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
 components:
   schemas:
     OrderItem:
@@ -143,6 +149,10 @@ components:
           type: integer
         status:
           type: string
+          enum:
+            - new
+            - paid
+            - cancelled
         items:
           type: array
           items:
@@ -168,6 +178,10 @@ components:
       properties:
         status:
           type: string
+          enum:
+            - new
+            - paid
+            - cancelled
       required:
         - status
     SetStatusRequest:
@@ -175,6 +189,9 @@ components:
       properties:
         status:
           type: string
+          enum:
+            - paid
+            - cancelled
       required:
         - status
     Error:
