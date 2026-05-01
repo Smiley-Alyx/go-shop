@@ -1,4 +1,4 @@
-# go-shop
+# Go Shop
 
 Мини-проект: два микросервиса на Go (стандартная библиотека).
 
@@ -28,6 +28,7 @@
 
 - `GET /healthz` -> `ok`
 - `GET /version` -> версия из env `VERSION`
+- `GET /orders` -> список заказов (JSON)
 - `POST /orders` -> создать заказ
   - body: `{ "items": [ { "product_id": 1, "qty": 2 } ] }`
   - response: созданный заказ `{ "id": 1, "status": "new", "items": [...], "total": 200 }`
@@ -87,6 +88,8 @@ curl -sS -X POST localhost:8082/orders/1/status \
   -H 'Content-Type: application/json' \
   -d '{"status":"paid"}'
 
+curl -sS localhost:8082/orders
+
 curl -sS localhost:8082/orders/1/status
 ```
 
@@ -134,7 +137,7 @@ make test
 Сейчас покрыто:
 
 - `catalog`: `/healthz`, `/version`, `/products` (list/get/create)
-- `order`: `/healthz`, `/version`, `/orders` (create/get/status), `/orders/{id}/status` (get/set)
+- `order`: `/healthz`, `/version`, `/orders` (list/create/get), `/orders/{id}/status` (get/set)
 
 ## Workflow (GitHub-style)
 

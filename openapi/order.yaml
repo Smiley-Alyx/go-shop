@@ -24,6 +24,16 @@ paths:
               schema:
                 type: string
   /orders:
+    get:
+      responses:
+        '200':
+          description: list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Order'
     post:
       requestBody:
         required: true
