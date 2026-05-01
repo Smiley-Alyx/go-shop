@@ -60,10 +60,22 @@ func storeOrderUpdateStatus(id int, status OrderStatus) (Order, int) {
 			continue
 		}
 
-		if orders[i].Status != OrderStatusNew {
-			return Order{}, 0
-		}
-		if status != OrderStatusPaid && status != OrderStatusCancelled {
+		from := orders[i].Status
+		to := status
+
+		if from == OrderStatusNew {
+			if to != OrderStatusPaid && to != OrderStatusCancelled {
+				return Order{}, 0
+			}
+		} else if from == OrderStatusPaid {
+			if to != OrderStatusShipped && to != OrderStatusCancelled {
+				return Order{}, 0
+			}
+		} else if from == OrderStatusShipped {
+			if to != OrderStatusDelivered {
+				return Order{}, 0
+			}
+		} else {
 			return Order{}, 0
 		}
 

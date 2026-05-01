@@ -196,8 +196,26 @@ func TestOrdersSetStatus(t *testing.T) {
 	r4.Header.Set("Content-Type", "application/json")
 	w4 := httptest.NewRecorder()
 	mux.ServeHTTP(w4, r4)
-	if w4.Code != http.StatusBadRequest {
+	if w4.Code != http.StatusOK {
 		t.Fatalf("set cancelled after paid status=%d body=%q", w4.Code, w4.Body.String())
+	}
+
+	var cancelled Order
+	err = json.Unmarshal(w4.Body.Bytes(), &cancelled)
+	if err != nil {
+		t.Fatalf("unmarshal: %v", err)
+	}
+	if cancelled.Status != OrderStatusCancelled {
+		t.Fatalf("status=%q", cancelled.Status)
+	}
+
+	body6 := []byte(`{"status":"shipped"}`)
+	r6 := httptest.NewRequest("POST", "/orders/1/status", bytes.NewReader(body6))
+	r6.Header.Set("Content-Type", "application/json")
+	w6 := httptest.NewRecorder()
+	mux.ServeHTTP(w6, r6)
+	if w6.Code != http.StatusBadRequest {
+		t.Fatalf("set shipped after cancelled status=%d body=%q", w6.Code, w6.Body.String())
 	}
 
 	body5 := []byte(`{"status":"paid"}`)
