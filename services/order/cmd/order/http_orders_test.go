@@ -227,3 +227,79 @@ func TestOrdersSetStatus(t *testing.T) {
 		t.Fatalf("set status not found status=%d body=%q", w5.Code, w5.Body.String())
 	}
 }
+
+func TestOrdersSetStatusChainDelivered(t *testing.T) {
+	stubCatalog := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != "GET" {
+			w.WriteHeader(http.StatusMethodNotAllowed)
+			return
+		}
+		if r.URL.Path == "/products/1" {
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusOK)
+			_, _ = w.Write([]byte(`{"id":1,"name":"tea","price":100}`))
+			return
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusNotFound)
+		_, _ = w.Write([]byte(`{"error":"not found"}`))
+	}))
+	defer stubCatalog.Close()
+
+	oldURL := catalogBaseURL
+	catalogBaseURL = stubCatalog.URL
+	defer func() { catalogBaseURL = oldURL }()
+
+	a := app{version: "test"}
+	resetOrdersForTest()
+
+	mux := http.NewServeMux()
+	mux.HandleFunc("POST /orders", a.handleOrdersCreate)
+	mux.HandleFunc("POST /orders/{id}/status", a.handleOrdersSetStatus)
+
+	body := []byte(`{"items":[{"product_id":1,"qty":2}]}`)
+	r := httptest.NewRequest("POST", "/orders", bytes.NewReader(body))
+	r.Header.Set("Content-Type", "application/json")
+	w := httptest.NewRecorder()
+	mux.ServeHTTP(w, r)
+	if w.Code != http.StatusCreated {
+		t.Fatalf("create status=%d body=%q", w.Code, w.Body.String())
+	}
+
+	body2 := []byte(`{"status":"paid"}`)
+	r2 := httptest.NewRequest("POST", "/orders/1/status", bytes.NewReader(body2))
+	r2.Header.Set("Content-Type", "application/json")
+	w2 := httptest.NewRecorder()
+	mux.ServeHTTP(w2, r2)
+	if w2.Code != http.StatusOK {
+		t.Fatalf("set paid status=%d body=%q", w2.Code, w2.Body.String())
+	}
+
+	body3 := []byte(`{"status":"shipped"}`)
+	r3 := httptest.NewRequest("POST", "/orders/1/status", bytes.NewReader(body3))
+	r3.Header.Set("Content-Type", "application/json")
+	w3 := httptest.NewRecorder()
+	mux.ServeHTTP(w3, r3)
+	if w3.Code != http.StatusOK {
+		t.Fatalf("set shipped status=%d body=%q", w3.Code, w3.Body.String())
+	}
+
+	body4 := []byte(`{"status":"delivered"}`)
+	r4 := httptest.NewRequest("POST", "/orders/1/status", bytes.NewReader(body4))
+	r4.Header.Set("Content-Type", "application/json")
+	w4 := httptest.NewRecorder()
+	mux.ServeHTTP(w4, r4)
+	if w4.Code != http.StatusOK {
+		t.Fatalf("set delivered status=%d body=%q", w4.Code, w4.Body.String())
+	}
+
+	body5 := []byte(`{"status":"cancelled"}`)
+	r5 := httptest.NewRequest("POST", "/orders/1/status", bytes.NewReader(body5))
+	r5.Header.Set("Content-Type", "application/json")
+	w5 := httptest.NewRecorder()
+	mux.ServeHTTP(w5, r5)
+	if w5.Code != http.StatusBadRequest {
+		t.Fatalf("set cancelled after delivered status=%d body=%q", w5.Code, w5.Body.String())
+	}
+}
