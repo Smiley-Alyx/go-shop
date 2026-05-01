@@ -74,6 +74,11 @@ func (a app) handleOrdersCreate(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusCreated, o)
 }
 
+func (a app) handleOrdersList(w http.ResponseWriter, r *http.Request) {
+	items := storeOrderList()
+	writeJSON(w, http.StatusOK, items)
+}
+
 func (a app) handleOrdersGet(w http.ResponseWriter, r *http.Request) {
 	idStr := r.PathValue("id")
 	id, err := strconv.Atoi(idStr)
@@ -112,7 +117,7 @@ func (a app) handleOrdersSetStatus(w http.ResponseWriter, r *http.Request) {
 	idStr := r.PathValue("id")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
-		writeJSON(w, http.StatusBadRequest, apiError{Error: "bad id"})
+		writeJSON(w, http.StatusBadRequest, apiError{Error: "bad id", Code: "bad_request"})
 		return
 	}
 

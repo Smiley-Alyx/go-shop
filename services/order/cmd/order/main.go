@@ -30,6 +30,7 @@ func main() {
 	mux.HandleFunc("GET /healthz", a.handleHealthz)
 	mux.HandleFunc("GET /version", a.handleVersion)
 	mux.HandleFunc("POST /orders", a.handleOrdersCreate)
+	mux.HandleFunc("GET /orders", a.handleOrdersList)
 	mux.HandleFunc("GET /orders/{id}", a.handleOrdersGet)
 	mux.HandleFunc("GET /orders/{id}/status", a.handleOrdersGetStatus)
 	mux.HandleFunc("POST /orders/{id}/status", a.handleOrdersSetStatus)
