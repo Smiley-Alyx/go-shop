@@ -14,6 +14,7 @@ func newOrderMuxForTest() *http.ServeMux {
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("POST /orders", a.handleOrdersCreate)
+	mux.HandleFunc("GET /orders", a.handleOrdersList)
 	mux.HandleFunc("GET /orders/{id}", a.handleOrdersGet)
 	mux.HandleFunc("GET /orders/{id}/status", a.handleOrdersGetStatus)
 	return mux
@@ -301,5 +302,75 @@ func TestOrdersSetStatusChainDelivered(t *testing.T) {
 	mux.ServeHTTP(w5, r5)
 	if w5.Code != http.StatusBadRequest {
 		t.Fatalf("set cancelled after delivered status=%d body=%q", w5.Code, w5.Body.String())
+	}
+}
+
+func TestOrdersList(t *testing.T) {
+	stubCatalog := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != "GET" {
+			w.WriteHeader(http.StatusMethodNotAllowed)
+			return
+		}
+		if r.URL.Path == "/products/1" {
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusOK)
+			_, _ = w.Write([]byte(`{"id":1,"name":"tea","price":100}`))
+			return
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusNotFound)
+		_, _ = w.Write([]byte(`{"error":"not found","code":"not_found"}`))
+	}))
+	defer stubCatalog.Close()
+
+	oldURL := catalogBaseURL
+	catalogBaseURL = stubCatalog.URL
+	defer func() { catalogBaseURL = oldURL }()
+
+	mux := newOrderMuxForTest()
+
+	w0 := httptest.NewRecorder()
+	r0 := httptest.NewRequest("GET", "/orders", nil)
+	mux.ServeHTTP(w0, r0)
+	if w0.Code != http.StatusOK {
+		t.Fatalf("list empty status=%d body=%q", w0.Code, w0.Body.String())
+	}
+
+	var empty []Order
+	err := json.Unmarshal(w0.Body.Bytes(), &empty)
+	if err != nil {
+		t.Fatalf("unmarshal: %v", err)
+	}
+	if len(empty) != 0 {
+		t.Fatalf("len=%d", len(empty))
+	}
+
+	body := []byte(`{"items":[{"product_id":1,"qty":2}]}`)
+	r := httptest.NewRequest("POST", "/orders", bytes.NewReader(body))
+	r.Header.Set("Content-Type", "application/json")
+	w := httptest.NewRecorder()
+	mux.ServeHTTP(w, r)
+	if w.Code != http.StatusCreated {
+		t.Fatalf("create status=%d body=%q", w.Code, w.Body.String())
+	}
+
+	w1 := httptest.NewRecorder()
+	r1 := httptest.NewRequest("GET", "/orders", nil)
+	mux.ServeHTTP(w1, r1)
+	if w1.Code != http.StatusOK {
+		t.Fatalf("list status=%d body=%q", w1.Code, w1.Body.String())
+	}
+
+	var got []Order
+	err = json.Unmarshal(w1.Body.Bytes(), &got)
+	if err != nil {
+		t.Fatalf("unmarshal: %v", err)
+	}
+	if len(got) != 1 {
+		t.Fatalf("len=%d", len(got))
+	}
+	if got[0].ID != 1 {
+		t.Fatalf("id=%d", got[0].ID)
 	}
 }
