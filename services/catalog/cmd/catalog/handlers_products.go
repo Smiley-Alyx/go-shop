@@ -13,7 +13,9 @@ type createProductRequest struct {
 }
 
 type apiError struct {
-	Error string `json:"error"`
+	Error   string         `json:"error"`
+	Code    string         `json:"code"`
+	Details map[string]any `json:"details,omitempty"`
 }
 
 func (a app) handleProductsList(w http.ResponseWriter, r *http.Request) {
@@ -25,13 +27,13 @@ func (a app) handleProductsGet(w http.ResponseWriter, r *http.Request) {
 	idStr := r.PathValue("id")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
-		writeJSON(w, http.StatusBadRequest, apiError{Error: "bad id"})
+		writeJSON(w, http.StatusBadRequest, apiError{Error: "bad id", Code: "bad_request"})
 		return
 	}
 
 	p, ok := storeProductGetByID(id)
 	if ok == 0 {
-		writeJSON(w, http.StatusNotFound, apiError{Error: "not found"})
+		writeJSON(w, http.StatusNotFound, apiError{Error: "not found", Code: "not_found"})
 		return
 	}
 
@@ -45,13 +47,13 @@ func (a app) handleProductsCreate(w http.ResponseWriter, r *http.Request) {
 	dec.DisallowUnknownFields()
 	err := dec.Decode(&req)
 	if err != nil {
-		writeJSON(w, http.StatusBadRequest, apiError{Error: "bad json"})
+		writeJSON(w, http.StatusBadRequest, apiError{Error: "bad json", Code: "bad_request"})
 		return
 	}
 
 	err = dec.Decode(&struct{}{})
 	if err != io.EOF {
-		writeJSON(w, http.StatusBadRequest, apiError{Error: "bad json"})
+		writeJSON(w, http.StatusBadRequest, apiError{Error: "bad json", Code: "bad_request"})
 		return
 	}
 
@@ -60,7 +62,7 @@ func (a app) handleProductsCreate(w http.ResponseWriter, r *http.Request) {
 	p.Price = req.Price
 
 	if p.Name == "" || p.Price < 0 {
-		writeJSON(w, http.StatusBadRequest, apiError{Error: "bad product"})
+		writeJSON(w, http.StatusBadRequest, apiError{Error: "bad product", Code: "validation"})
 		return
 	}
 
