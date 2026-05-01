@@ -33,6 +33,9 @@
   - response: созданный заказ `{ "id": 1, "status": "new", "items": [...], "total": 200 }`
 - `GET /orders/{id}` -> заказ (JSON) или `404`
 - `GET /orders/{id}/status` -> `{ "status": "new" }`
+- `POST /orders/{id}/status` -> сменить статус заказа
+  - body: `{ "status": "paid" }`
+  - статусы: `new` -> `paid`/`cancelled` -> `shipped` -> `delivered` (terminal), `cancelled` (terminal)
 
 ## Конфигурация (env)
 
@@ -79,6 +82,10 @@ curl -sS -X POST localhost:8081/products \
 curl -sS -X POST localhost:8082/orders \
   -H 'Content-Type: application/json' \
   -d '{"items":[{"product_id":1,"qty":2}]}'
+
+curl -sS -X POST localhost:8082/orders/1/status \
+  -H 'Content-Type: application/json' \
+  -d '{"status":"paid"}'
 
 curl -sS localhost:8082/orders/1/status
 ```
@@ -127,7 +134,7 @@ make test
 Сейчас покрыто:
 
 - `catalog`: `/healthz`, `/version`, `/products` (list/get/create)
-- `order`: `/healthz`, `/version`, `/orders` (create/get/status)
+- `order`: `/healthz`, `/version`, `/orders` (create/get/status), `/orders/{id}/status` (get/set)
 
 ## Workflow (GitHub-style)
 
