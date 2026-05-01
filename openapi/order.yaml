@@ -205,5 +205,10 @@ components:
       properties:
         error:
           type: string
+        code:
+          type: string
+        details:
+          type: object
       required:
         - error
+        - code
